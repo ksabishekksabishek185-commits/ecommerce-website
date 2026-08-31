@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color"
+          content="#6c5ce7">
+
+    <meta name="description"
+          content="Wholesale Product Expiry Alert System">
+
+    <title>Expiry Alert</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="manifest" href="manifest.json">
+
+    <!-- QR + BARCODE SCANNER -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+</head>
+
+<body>
+
+
+<!-- =====================================================
+     LOGIN
+===================================================== -->
+
+<section id="loginPage" class="login-page">
+
+    <div class="login-background-circle circle-one"></div>
+    <div class="login-background-circle circle-two"></div>
+
+    <div class="login-card">
+
+        <div class="brand-logo">
+            📦
+        </div>
+
+        <h1>Expiry<span>Alert</span></h1>
+
+        <p class="login-description">
+            Smart Product & Stock Management
+        </p>
+
+        <div class="welcome-box">
+
+            <strong>
+                Welcome Back 👋
+            </strong>
+
+            <small>
+                Login to manage your products
+            </small>
+
+        </div>
+
+
+        <form id="loginForm">
+
+            <div class="input-group">
+
+                <label>
+                    Username
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span>👤</span>
+
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span>🔒</span>
+
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="password-eye"
+                        id="togglePassword">
+
+                        👁️
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button">
+
+                <span>
+                    Login to Dashboard
+                </span>
+
+                <span>
+                    →
+                </span>
+
+            </button>
+
+        </form>
+
+
+        <div class="login-footer">
+
+            <span>🔐</span>
+
+            <p>
+                Your stock data is saved securely
+                on this device.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     APPLICATION
+===================================================== -->
+
+<div
+    id="appPage"
+    class="app-page hidden">
+
+
+    <!-- HEADER -->
+
+    <header class="top-header">
+
+        <div class="user-area">
+
+            <div class="user-avatar">
+                👤
+            </div>
+
+            <div>
+
+                <small>
+                    Welcome back
+                </small>
+
+                <h2 id="welcomeUser">
+                    User
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <button
+            id="notificationBtn"
+            class="notification-button">
+
+            🔔
+
+            <span class="notification-dot"></span>
+
+        </button>
+
+    </header>
+
+
+
+    <main>
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <section
+            id="dashboardSection"
+            class="page-section">
+
+
+            <div class="page-heading">
+
+                <div>
+
+                    <span class="heading-label">
+                        OVERVIEW
+                    </span>
+
+                    <h1>
+                        Dashboard
+                    </h1>
+
+                    <p>
+                        Manage your wholesale stock easily
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- STAT CARDS -->
+
+            <div class="stats-grid">
+
+
+                <div class="stat-card purple-card">
+
+                    <div class="stat-icon">
+                        📦
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Total Products
+                        </span>
+
+                        <strong id="totalProducts">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="stat-card blue-card">
+
+                    <div class="stat-icon">
+                        📊
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Available Stock
+                        </span>
+
+                        <strong id="totalStock">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="stat-card orange-card">
+
+                    <div class="stat-icon">
+                        ⚠️
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Low Stock
+                        </span>
+
+                        <strong id="lowStock">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="stat-card red-card">
+
+                    <div class="stat-icon">
+                        ⏰
+                    </div>
+
+                    <div>
+
+                        <span>
+                            Expiring Soon
+                        </span>
+
+                        <strong id="expiringSoon">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SCANNER BANNER -->
+
+            <div class="qr-banner">
+
+                <div class="qr-banner-content">
+
+                    <span class="banner-tag">
+                        QUICK SCAN
+                    </span>
+
+                    <h2>
+                        Scan Barcode / QR
+                    </h2>
+
+                    <p>
+                        Scan any supported product
+                        Barcode or QR code.
+                    </p>
+
+                    <button
+                        class="banner-button"
+                        onclick="openPage('scanner')">
+
+                        📷 Scan Now
+
+                        <span>
+                            →
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <div class="qr-decoration">
+
+                    <div class="qr-pattern">
+                        ▦
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- QUICK ACTIONS -->
+
+            <div class="content-title">
+
+                <div>
+
+                    <h2>
+                        Quick Actions
+                    </h2>
+
+                    <p>
+                        Frequently used options
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="quick-grid">
+
+
+                <button
+                    class="quick-card"
+                    onclick="openAddProduct()">
+
+                    <div class="quick-icon purple-icon">
+                        ➕
+                    </div>
+
+                    <strong>
+                        Add Product
+                    </strong>
+
+                    <small>
+                        Add new stock
+                    </small>
+
+                </button>
+
+
+
+                <button
+                    class="quick-card"
+                    onclick="openPage('products')">
+
+                    <div class="quick-icon blue-icon">
+                        📦
+                    </div>
+
+                    <strong>
+                        Products
+                    </strong>
+
+                    <small>
+                        View all products
+                    </small>
+
+                </button>
+
+
+
+                <button
+                    class="quick-card"
+                    onclick="openPage('alerts')">
+
+                    <div class="quick-icon red-icon">
+                        🔔
+                    </div>
+
+                    <strong>
+                        Alerts
+                    </strong>
+
+                    <small>
+                        Check expiry alerts
+                    </small>
+
+                </button>
+
+
+
+                <button
+                    class="quick-card"
+                    onclick="openPage('history')">
+
+                    <div class="quick-icon blue-icon">
+                        📜
+                    </div>
+
+                    <strong>
+                        History
+                    </strong>
+
+                    <small>
+                        View sales history
+                    </small>
+
+                </button>
+
+
+
+                <button
+                    class="quick-card"
+                    onclick="enableNotifications()">
+
+                    <div class="quick-icon green-icon">
+                        🔔
+                    </div>
+
+                    <strong>
+                        Notifications
+                    </strong>
+
+                    <small>
+                        Enable alerts
+                    </small>
+
+                </button>
+
+            </div>
+
+
+
+            <!-- RECENT -->
+
+            <div class="content-title recent-title">
+
+                <div>
+
+                    <h2>
+                        Recent Products
+                    </h2>
+
+                    <p>
+                        Recently added products
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="view-button"
+                    onclick="openPage('products')">
+
+                    View All →
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="recentProducts"
+                class="product-list">
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             BARCODE + QR SCANNER
+        ================================================== -->
+
+        <section
+            id="scannerSection"
+            class="page-section hidden">
+
+
+            <div class="page-heading">
+
+                <span class="heading-label">
+                    BARCODE / QR
+                </span>
+
+                <h1>
+                    Product Scanner
+                </h1>
+
+                <p>
+                    Scan Barcode or QR code
+                    to get product information
+                </p>
+
+            </div>
+
+
+
+            <div class="scanner-card">
+
+
+                <div class="scanner-header">
+
+                    <div class="scanner-icon">
+                        📷
+                    </div>
+
+                    <div>
+
+                        <h2>
+                            Barcode & QR Scanner
+                        </h2>
+
+                        <p>
+                            Place Barcode or QR code
+                            inside the frame
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- CAMERA -->
+
+                <div id="reader"></div>
+
+
+
+                <div class="scanner-buttons">
+
+
+                    <button
+                        id="startScannerBtn"
+                        class="primary-button">
+
+                        📷 Start Scanner
+
+                    </button>
+
+
+                    <button
+                        id="stopScannerBtn"
+                        class="secondary-button">
+
+                        ⛔ Stop
+
+                    </button>
+
+                </div>
+
+
+
+                <p
+                    id="scannerMessage"
+                    class="scanner-message">
+
+                    Click Start Scanner to scan
+                    Barcode or QR code.
+
+                </p>
+
+            </div>
+
+
+
+            <!-- RESULT -->
+
+            <div
+                id="scanResult"
+                class="scan-result hidden">
+
+
+                <div class="result-title">
+                    ✅ Scan Successful
+                </div>
+
+
+                <div id="scanText"></div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             PRODUCTS
+        ================================================== -->
+
+        <section
+            id="productsSection"
+            class="page-section hidden">
+
+
+            <div class="page-heading product-heading">
+
+                <div>
+
+                    <span class="heading-label">
+                        INVENTORY
+                    </span>
+
+                    <h1>
+                        Products
+                    </h1>
+
+                    <p>
+                        Manage your wholesale stock
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="add-product-button"
+                    onclick="openAddProduct()">
+
+                    <span>
+                        +
+                    </span>
+
+                    Add Product
+
+                </button>
+
+            </div>
+
+
+
+            <div class="search-box">
+
+                <span>
+                    🔍
+                </span>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search product or ID..."
+                >
+
+            </div>
+
+
+
+            <div class="filter-row">
+
+
+                <button
+                    class="filter-btn active"
+                    data-filter="all">
+
+                    All
+
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-filter="good">
+
+                    Good
+
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-filter="soon">
+
+                    Expiring
+
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-filter="expired">
+
+                    Expired
+
+                </button>
+
+
+                <button
+                    class="filter-btn"
+                    data-filter="low">
+
+                    Low Stock
+
+                </button>
+
+            </div>
+
+
+
+            <div
+                id="productList"
+                class="product-list">
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ALERTS
+        ================================================== -->
+
+        <section
+            id="alertsSection"
+            class="page-section hidden">
+
+
+            <div class="page-heading">
+
+                <span class="heading-label">
+                    ATTENTION
+                </span>
+
+                <h1>
+                    Expiry Alerts
+                </h1>
+
+                <p>
+                    Products that need your attention
+                </p>
+
+            </div>
+
+
+            <div
+                id="alertList"
+                class="alert-list">
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             HISTORY
+        ================================================== -->
+
+        <section
+            id="historySection"
+            class="page-section hidden">
+
+
+            <div class="page-heading">
+
+                <span class="heading-label">
+                    ACTIVITY
+                </span>
+
+                <h1>
+                    Sales History
+                </h1>
+
+                <p>
+                    Recently sold products
+                </p>
+
+            </div>
+
+
+            <div
+                id="historyList"
+                class="history-list">
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =================================================
+         BOTTOM NAV
+    ================================================== -->
+
+    <nav class="bottom-nav">
+
+
+        <button
+            class="nav-btn active"
+            data-page="dashboard">
+
+            <span>
+                🏠
+            </span>
+
+            <small>
+                Home
+            </small>
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-page="scanner">
+
+            <span>
+                📷
+            </span>
+
+            <small>
+                Scan
+            </small>
+
+        </button>
+
+
+        <button
+            class="nav-add"
+            onclick="openAddProduct()">
+
+            +
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-page="products">
+
+            <span>
+                📦
+            </span>
+
+            <small>
+                Products
+            </small>
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-page="alerts">
+
+            <span>
+                🔔
+            </span>
+
+            <small>
+                Alerts
+            </small>
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-page="history">
+
+            <span>
+                📜
+            </span>
+
+            <small>
+                History
+            </small>
+
+        </button>
+
+    </nav>
+
+
+
+    <!-- LOGOUT -->
+
+    <button
+        id="logoutBtn"
+        class="logout-button">
+
+        🚪 Logout
+
+    </button>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     ADD / EDIT PRODUCT MODAL
+===================================================== -->
+
+<div
+    id="productModal"
+    class="modal hidden">
+
+
+    <div class="modal-box">
+
+
+        <div class="modal-header">
+
+
+            <div>
+
+                <span class="modal-label">
+                    INVENTORY
+                </span>
+
+                <h2 id="modalTitle">
+                    Add Product
+                </h2>
+
+                <p>
+                    Enter product information
+                </p>
+
+            </div>
+
+
+            <button
+                onclick="closeProductModal()"
+                class="close-button">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+
+        <form id="productForm">
+
+
+            <input
+                type="hidden"
+                id="editProductId"
+            >
+
+
+            <div class="input-group">
+
+                <label>
+                    Product Name
+                </label>
+
+                <input
+                    type="text"
+                    id="productName"
+                    placeholder="Example: Milk Powder"
+                    required
+                >
+
+            </div>
+
+
+
+            <div class="input-group">
+
+                <label>
+                    Product ID / QR / Barcode
+                </label>
+
+                <input
+                    type="text"
+                    id="productCode"
+                    placeholder="Scan or enter product code"
+                    required
+                >
+
+            </div>
+
+
+
+            <div class="two-inputs">
+
+
+                <div class="input-group">
+
+                    <label>
+                        Total Quantity
+                    </label>
+
+                    <input
+                        type="number"
+                        id="totalQuantity"
+                        min="0"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>
+                        Sold Quantity
+                    </label>
+
+                    <input
+                        type="number"
+                        id="soldQuantity"
+                        min="0"
+                        value="0"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <div class="input-group">
+
+                <label>
+                    Expiry Date
+                </label>
+
+                <input
+                    type="date"
+                    id="expiryDate"
+                    required
+                >
+
+            </div>
+
+
+
+            <button
+                type="submit"
+                class="save-button">
+
+                💾 Save Product
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SELL MODAL
+===================================================== -->
+
+<div
+    id="sellModal"
+    class="modal hidden">
+
+
+    <div class="modal-box small-modal">
+
+
+        <div class="modal-header">
+
+
+            <div>
+
+                <span class="modal-label">
+                    STOCK
+                </span>
+
+                <h2>
+                    Sell Product
+                </h2>
+
+                <p id="sellProductName">
+                    Product
+                </p>
+
+            </div>
+
+
+            <button
+                onclick="closeSellModal()"
+                class="close-button">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+
+        <div class="available-stock">
+
+            <span>
+                Available Stock
+            </span>
+
+            <strong id="availableStock">
+                0
+            </strong>
+
+        </div>
+
+
+
+        <div class="input-group">
+
+            <label>
+                Quantity Sold
+            </label>
+
+            <input
+                type="number"
+                id="sellQuantity"
+                min="1"
+                value="1"
+            >
+
+        </div>
+
+
+
+        <button
+            id="confirmSellBtn"
+            class="save-button">
+
+            💰 Confirm Sale
+
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    id="toast"
+    class="toast">
+
+    <span id="toastIcon">
+        ✓
+    </span>
+
+    <span id="toastText">
+        Done
+    </span>
+
+</div>
+
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
