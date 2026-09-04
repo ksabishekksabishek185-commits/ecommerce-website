@@ -49,20 +49,38 @@
             Smart Product & Stock Management
         </p>
 
-        <div class="welcome-box">
 
-            <strong>
-                Welcome Back 👋
-            </strong>
+        <!-- ============ AUTH TABS ============ -->
 
-            <small>
-                Login to manage your products
-            </small>
+        <div class="auth-tabs">
+
+            <button
+                type="button"
+                class="auth-tab active"
+                data-authtab="login">
+
+                Login
+
+            </button>
+
+            <button
+                type="button"
+                class="auth-tab"
+                data-authtab="signup">
+
+                Sign Up
+
+            </button>
 
         </div>
 
 
-        <form id="loginForm">
+        <!-- ============ LOGIN FORM ============ -->
+
+        <form
+            id="loginForm"
+            class="auth-form auth-login"
+            autocomplete="on">
 
             <div class="input-group">
 
@@ -107,8 +125,8 @@
 
                     <button
                         type="button"
-                        class="password-eye"
-                        id="togglePassword">
+                        class="password-eye login-eye"
+                        data-toggle="#password">
 
                         👁️
 
@@ -130,6 +148,213 @@
                 <span>
                     →
                 </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="forgot-link"
+                id="forgotBtn">
+
+                Forgot Password?
+
+            </button>
+
+        </form>
+
+
+        <!-- ============ SIGNUP FORM ============ -->
+
+        <form
+            id="signupForm"
+            class="auth-form auth-signup hidden"
+            autocomplete="on">
+
+            <div class="input-group">
+
+                <label>
+                    Name
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span>👤</span>
+
+                    <input
+                        type="text"
+                        id="signupName"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Username
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span>@</span>
+
+                    <input
+                        type="text"
+                        id="signupUsername"
+                        placeholder="Choose a username"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span>🔒</span>
+
+                    <input
+                        type="password"
+                        id="signupPassword"
+                        placeholder="Create a password"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="password-eye signup-eye"
+                        data-toggle="#signupPassword">
+
+                        👁️
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button">
+
+                <span>
+                    Create Account
+                </span>
+
+                <span>
+                    →
+                </span>
+
+            </button>
+
+        </form>
+
+
+        <!-- ============ FORGOT PASSWORD FORM ============ -->
+
+        <form
+            id="forgotForm"
+            class="auth-form auth-forgot hidden"
+            autocomplete="on">
+
+            <p class="forgot-note">
+                Enter your username and choose a
+                new password to reset it.
+            </p>
+
+
+            <div class="input-group">
+
+                <label>
+                    Username
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span>@</span>
+
+                    <input
+                        type="text"
+                        id="forgotUsername"
+                        placeholder="Your username"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    New Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span>🔒</span>
+
+                    <input
+                        type="password"
+                        id="forgotNewPassword"
+                        placeholder="Enter new password"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="password-eye forgot-eye"
+                        data-toggle="#forgotNewPassword">
+
+                        👁️
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-button">
+
+                <span>
+                    Reset Password
+                </span>
+
+                <span>
+                    →
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="forgot-link"
+                id="backToLoginBtn">
+
+                ← Back to Login
 
             </button>
 
@@ -497,6 +722,46 @@
 
                 </button>
 
+
+
+                <button
+                    class="quick-card"
+                    onclick="openPage('scanner')">
+
+                    <div class="quick-icon blue-icon">
+                        🏷️
+                    </div>
+
+                    <strong>
+                        Scan &amp; Add
+                    </strong>
+
+                    <small>
+                        Barcode quick add
+                    </small>
+
+                </button>
+
+
+
+                <button
+                    class="quick-card"
+                    onclick="openPage('billing')">
+
+                    <div class="quick-icon green-icon">
+                        🧾
+                    </div>
+
+                    <strong>
+                        Billing
+                    </strong>
+
+                    <small>
+                        Create a bill
+                    </small>
+
+                </button>
+
             </div>
 
 
@@ -629,6 +894,12 @@
 
                     Click Start Scanner to scan
                     Barcode or QR code.
+
+                    <br>
+
+                    After scanning, choose
+                    <strong>Add This Product</strong>
+                    to add it quickly.
 
                 </p>
 
@@ -815,6 +1086,164 @@
 
 
         <!-- =================================================
+             BILLING
+        ================================================== -->
+
+        <section
+            id="billingSection"
+            class="page-section hidden">
+
+
+            <div class="page-heading">
+
+                <span class="heading-label">
+                    POS / BILLING
+                </span>
+
+                <h1>
+                    Billing
+                </h1>
+
+                <p>
+                    Create a bill and reduce stock automatically
+                </p>
+
+            </div>
+
+
+            <div class="billing-layout">
+
+
+                <div class="billing-panel">
+
+                    <div class="content-title">
+
+                        <div>
+
+                            <h2>
+                                Add Products to Bill
+                            </h2>
+
+                            <p>
+                                Search and add items to this bill
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="search-box">
+
+                        <span>
+                            🔍
+                        </span>
+
+                        <input
+                            type="text"
+                            id="billingSearch"
+                            placeholder="Search product or ID..."
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="billingProducts"
+                        class="billing-products">
+
+                    </div>
+
+                </div>
+
+
+                <div class="billing-panel cart-panel">
+
+                    <div class="content-title">
+
+                        <div>
+
+                            <h2>
+                                Current Bill
+                            </h2>
+
+                            <p id="billItemCount">
+                                0 item(s)
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="billCart"
+                        class="bill-cart">
+
+                        <div class="empty-state">
+                            <div class="empty-icon">🧾</div>
+                            <h3>Bill is Empty</h3>
+                            <p>Add products from the left side.</p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="bill-total">
+
+                        <span>
+                            Total
+                        </span>
+
+                        <strong id="billTotal">
+                            ₹0.00
+                        </strong>
+
+                    </div>
+
+
+                    <button
+                        id="generateBillBtn"
+                        class="save-button"
+                        style="width:100%;">
+
+                        🧾 Generate Bill
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="content-title recent-title">
+
+                <div>
+
+                    <h2>
+                        Recent Bills
+                    </h2>
+
+                    <p>
+                        Bills created on this device
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="billList"
+                class="bill-list">
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
              HISTORY
         ================================================== -->
 
@@ -924,6 +1353,21 @@
 
             <small>
                 Alerts
+            </small>
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-page="billing">
+
+            <span>
+                🧾
+            </span>
+
+            <small>
+                Billing
             </small>
 
         </button>
@@ -1091,6 +1535,25 @@
             <div class="input-group">
 
                 <label>
+                    Price per unit (₹)
+                </label>
+
+                <input
+                    type="number"
+                    id="productPrice"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                    required
+                >
+
+            </div>
+
+
+
+            <div class="input-group">
+
+                <label>
                     Expiry Date
                 </label>
 
@@ -1202,6 +1665,165 @@
             💰 Confirm Sale
 
         </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     RECEIPT MODAL
+===================================================== -->
+
+<div
+    id="receiptModal"
+    class="modal hidden">
+
+    <div class="modal-box receipt-modal-box">
+
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="modal-label">
+                    RECEIPT
+                </span>
+
+                <h2>
+                    Customer Receipt
+                </h2>
+
+                <p>
+                    Bill details to share with the customer
+                </p>
+
+            </div>
+
+
+            <button
+                onclick="closeReceipt()"
+                class="close-button">
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <div id="receiptPrint" class="receipt">
+
+
+            <div class="receipt-head">
+
+                <div class="receipt-logo">
+                    📦
+                </div>
+
+                <strong>
+                    Expiry Alert
+                </strong>
+
+                <small>
+                    Wholesale Product &amp; Stock Management
+                </small>
+
+            </div>
+
+
+            <div class="receipt-meta">
+
+                <div>
+
+                    <span>Bill No</span>
+
+                    <strong id="receiptNumber">
+                        #B00000000
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    <span>Date</span>
+
+                    <strong id="receiptDate">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <table class="receipt-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>Item</th>
+
+                        <th>Qty</th>
+
+                        <th>Rate</th>
+
+                        <th>Amount</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="receiptItems">
+
+                </tbody>
+
+            </table>
+
+
+            <div class="receipt-foot">
+
+                <div>
+
+                    <span id="receiptItemCount">
+                        0 item(s)
+                    </span>
+
+                </div>
+
+                <div class="receipt-total">
+
+                    <span>Total</span>
+
+                    <strong id="receiptTotal">
+                        ₹0.00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <p class="receipt-thanks">
+                Thank you for your purchase!
+            </p>
+
+        </div>
+
+
+        <button
+            id="printReceiptBtn"
+            class="save-button"
+            style="width:100%;">
+
+            🖨️ Print Receipt
+
+        </button>
+
 
     </div>
 

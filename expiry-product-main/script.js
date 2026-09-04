@@ -55,7 +55,6 @@ function saveProducts() {
 document.addEventListener("DOMContentLoaded", function () {
     loadProducts();
 
-    setupLogin();
     setupNavigation();
     setupProductForm();
     setupSearch();
@@ -64,7 +63,10 @@ document.addEventListener("DOMContentLoaded", function () {
     setupLogout();
     setupNotificationButton();
     setupPasswordToggle();
+    setupAuth();
+    setupBilling();
 
+    restoreLogin();
     updateAll();
     registerServiceWorker();
     checkExpiryAlerts();
@@ -74,24 +76,104 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 /* =====================================================
-   PASSWORD TOGGLE
+   USER AUTHENTICATION (localStorage-based)
 ===================================================== */
 
+function getUsers() {
+    try {
+        const saved = localStorage.getItem("expiryUsers");
+        const users = saved ? JSON.parse(saved) : {};
+        return users && typeof users === "object" ? users : {};
+    } catch (error) {
+        console.error("Users load error:", error);
+        return {};
+    }
+}
+
+
+function saveUsers(users) {
+    try {
+        localStorage.setItem("expiryUsers", JSON.stringify(users));
+        return true;
+    } catch (error) {
+        console.error("Users save error:", error);
+        return false;
+    }
+}
+
+
 function setupPasswordToggle() {
-    const button = document.getElementById("togglePassword");
-    const password = document.getElementById("password");
+    document.querySelectorAll(".password-eye").forEach(function (button) {
+        button.addEventListener("click", function () {
+            const target = document.querySelector(button.dataset.toggle);
+            if (!target) return;
 
-    if (!button || !password) return;
-
-    button.addEventListener("click", function () {
-        if (password.type === "password") {
-            password.type = "text";
-            button.textContent = "🙈";
-        } else {
-            password.type = "password";
-            button.textContent = "👁️";
-        }
+            if (target.type === "password") {
+                target.type = "text";
+                button.textContent = "🙈";
+            } else {
+                target.type = "password";
+                button.textContent = "👁️";
+            }
+        });
     });
+}
+
+
+/* =====================================================
+   AUTH TABS + FORMS
+===================================================== */
+
+function setupAuth() {
+    setupAuthTabs();
+
+    setupLogin();
+    setupSignup();
+    setupForgotPassword();
+}
+
+
+function setupAuthTabs() {
+    document.querySelectorAll(".auth-tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+            document.querySelectorAll(".auth-tab").forEach(function (t) {
+                t.classList.remove("active");
+            });
+            tab.classList.add("active");
+
+            showAuthForm(tab.dataset.authtab);
+        });
+    });
+
+    const backBtn = document.getElementById("backToLoginBtn");
+    if (backBtn) {
+        backBtn.addEventListener("click", function () {
+            setActiveAuthTab("login");
+        });
+    }
+}
+
+
+function setActiveAuthTab(name) {
+    document.querySelectorAll(".auth-tab").forEach(function (t) {
+        t.classList.toggle("active", t.dataset.authtab === name);
+    });
+    showAuthForm(name);
+}
+
+
+function showAuthForm(name) {
+    document.querySelectorAll(".auth-form").forEach(function (form) {
+        form.classList.add("hidden");
+    });
+
+    if (name === "login") {
+        document.getElementById("loginForm")?.classList.remove("hidden");
+    } else if (name === "signup") {
+        document.getElementById("signupForm")?.classList.remove("hidden");
+    } else if (name === "forgot") {
+        document.getElementById("forgotForm")?.classList.remove("hidden");
+    }
 }
 
 
@@ -106,11 +188,25 @@ function setupLogin() {
     loginForm.addEventListener("submit", function (event) {
         event.preventDefault();
 
-        const username = document.getElementById("username")?.value.trim() || "";
-        const password = document.getElementById("password")?.value.trim() || "";
+        const username =
+            document.getElementById("username")?.value.trim() || "";
+        const password =
+            document.getElementById("password")?.value || "";
 
         if (!username || !password) {
             showToast("Enter username and password", "⚠️");
+            return;
+        }
+
+        const users = getUsers();
+
+        if (!users[username]) {
+            showToast("User not found", "❌");
+            return;
+        }
+
+        if (users[username].password !== password) {
+            showToast("Incorrect password", "❌");
             return;
         }
 
@@ -118,7 +214,116 @@ function setupLogin() {
         sessionStorage.setItem("loggedUsername", username);
         openApplication(username);
     });
+}
 
+
+/* =====================================================
+   SIGN UP
+===================================================== */
+
+function setupSignup() {
+    const signupForm = document.getElementById("signupForm");
+    if (!signupForm) return;
+
+    signupForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const name =
+            document.getElementById("signupName")?.value.trim() || "";
+        const username =
+            document.getElementById("signupUsername")?.value.trim() || "";
+        const password =
+            document.getElementById("signupPassword")?.value || "";
+
+        if (!name || !username || !password) {
+            showToast("Please fill all fields", "⚠️");
+            return;
+        }
+
+        if (username.length < 3) {
+            showToast("Username must be at least 3 characters", "⚠️");
+            return;
+        }
+
+        if (password.length < 4) {
+            showToast("Password must be at least 4 characters", "⚠️");
+            return;
+        }
+
+        const users = getUsers();
+
+        if (users[username]) {
+            showToast("Username already exists", "❌");
+            return;
+        }
+
+        users[username] = {
+            name: name,
+            password: password,
+            createdAt: new Date().toISOString()
+        };
+
+        if (saveUsers(users)) {
+            showToast("Account created! Please login.", "✓");
+            setActiveAuthTab("login");
+            signupForm.reset();
+        }
+    });
+}
+
+
+/* =====================================================
+   FORGOT PASSWORD
+===================================================== */
+
+function setupForgotPassword() {
+    const forgotBtn = document.getElementById("forgotBtn");
+    if (forgotBtn) {
+        forgotBtn.addEventListener("click", function () {
+            showAuthForm("forgot");
+        });
+    }
+
+    const forgotForm = document.getElementById("forgotForm");
+    if (!forgotForm) return;
+
+    forgotForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const username =
+            document.getElementById("forgotUsername")?.value.trim() || "";
+        const newPassword =
+            document.getElementById("forgotNewPassword")?.value || "";
+
+        if (!username || !newPassword) {
+            showToast("Enter username and new password", "⚠️");
+            return;
+        }
+
+        if (newPassword.length < 4) {
+            showToast("Password must be at least 4 characters", "⚠️");
+            return;
+        }
+
+        const users = getUsers();
+
+        if (!users[username]) {
+            showToast("User not found", "❌");
+            return;
+        }
+
+        users[username].password = newPassword;
+
+        if (saveUsers(users)) {
+            showToast("Password reset successfully!", "✓");
+            forgotForm.reset();
+            setActiveAuthTab("login");
+        }
+    });
+}
+
+
+function restoreLogin() {
     if (sessionStorage.getItem("loggedIn") === "true") {
         openApplication(
             sessionStorage.getItem("loggedUsername") || "User"
@@ -135,7 +340,12 @@ function openApplication(username) {
     document.getElementById("loginPage")?.classList.add("hidden");
     document.getElementById("appPage")?.classList.remove("hidden");
 
-    setText("welcomeUser", username);
+    const users = getUsers();
+    const displayName = (users[username] && users[username].name)
+        ? users[username].name
+        : username;
+
+    setText("welcomeUser", displayName);
     updateAll();
 }
 
@@ -176,6 +386,7 @@ function openPage(pageName) {
         scanner: "scannerSection",
         products: "productsSection",
         alerts: "alertsSection",
+        billing: "billingSection",
         history: "historySection"
     };
 
@@ -236,6 +447,7 @@ function setupProductForm() {
         const code = document.getElementById("productCode")?.value.trim() || "";
         const total = Number(document.getElementById("totalQuantity")?.value);
         const sold = Number(document.getElementById("soldQuantity")?.value);
+        const price = Number(document.getElementById("productPrice")?.value);
         const expiry = document.getElementById("expiryDate")?.value || "";
 
         if (!name) {
@@ -268,6 +480,11 @@ function setupProductForm() {
             return;
         }
 
+        if (!Number.isFinite(price) || price < 0) {
+            showToast("Enter valid price", "⚠️");
+            return;
+        }
+
         if (editId) {
             const index = products.findIndex(
                 product => String(product.id) === String(editId)
@@ -293,6 +510,7 @@ function setupProductForm() {
             products[index].code = code;
             products[index].total = total;
             products[index].sold = sold;
+            products[index].price = price;
             products[index].expiry = expiry;
 
             if (saveProducts()) {
@@ -319,6 +537,7 @@ function setupProductForm() {
             code,
             total,
             sold,
+            price,
             expiry,
             createdAt: new Date().toISOString()
         });
@@ -354,6 +573,7 @@ function editProduct(id) {
     setInputValue("productCode", product.code);
     setInputValue("totalQuantity", product.total);
     setInputValue("soldQuantity", product.sold);
+    setInputValue("productPrice", Number(product.price) || 0);
     setInputValue("expiryDate", product.expiry);
 }
 
@@ -545,6 +765,8 @@ function updateAll() {
     renderProducts();
     renderRecentProducts();
     renderAlerts();
+    renderBillingProducts();
+    renderBillList();
     renderHistory();
 }
 
@@ -632,6 +854,10 @@ function createProductCard(product) {
             <div style="margin-top:12px;font-size:13px;color:#737b91;">
                 Expiry:
                 <strong>${expiryText}</strong>
+            </div>
+
+            <div style="margin-top:6px;font-size:14px;color:#2ecc71;font-weight:700;">
+                ₹${Number(product.price) || 0}
             </div>
 
             <div class="card-actions">
@@ -957,9 +1183,70 @@ async function onScanSuccess(decodedText, decodedResult) {
 
     const productData = parseScannedProduct(text);
 
-    showScanResult(productData, text, decodedResult);
+    await showScanResult(productData, text, decodedResult);
 
     await stopScanner();
+}
+
+
+/* =====================================================
+   ONLINE BARCODE LOOKUP (product name)
+===================================================== */
+
+async function fetchProductNameByCode(code) {
+    if (!code) return null;
+
+    const barcode = String(code).replace(/[^0-9]/g, "");
+
+    if (barcode.length < 8) return null;
+
+    try {
+        const response = await fetch(
+            "https://world.openfoodfacts.org/api/v2/product/" +
+            encodeURIComponent(barcode) +
+            ".json"
+        );
+
+        if (!response.ok) return null;
+
+        const data = await response.json();
+
+        if (!data || data.status !== 1 || !data.product) return null;
+
+        const name =
+            data.product.product_name ||
+            data.product.generic_name ||
+            data.product.brands ||
+            "";
+
+        return String(name).trim() || null;
+    } catch (error) {
+        console.error("Barcode lookup error:", error);
+        return null;
+    }
+}
+
+
+/* =====================================================
+   ADD SCANNED PRODUCT
+===================================================== */
+
+let scannedPendingName = "";
+let scannedPendingCode = "";
+
+function openAddFromScan(code, name) {
+    scannedPendingCode = String(code || "").trim();
+    scannedPendingName = String(name || "").trim();
+
+    openAddProduct();
+
+    if (scannedPendingCode) {
+        setInputValue("productCode", scannedPendingCode);
+    }
+
+    if (scannedPendingName) {
+        setInputValue("productName", scannedPendingName);
+    }
 }
 
 
@@ -1093,7 +1380,7 @@ function normalizeScannedProduct(data) {
    SHOW SCAN RESULT
 ===================================================== */
 
-function showScanResult(result, rawText, decodedResult) {
+async function showScanResult(result, rawText, decodedResult) {
     const resultBox = document.getElementById("scanResult");
     const scanText = document.getElementById("scanText");
 
@@ -1152,30 +1439,87 @@ function showScanResult(result, rawText, decodedResult) {
         return;
     }
 
-    // Code-only result: never show "Product not found".
-    // We show the scanned code and explain that the code itself
-    // did not contain the extra fields.
+    // Code-only result: the barcode/QR contains only an ID number.
+    // Look up the product name online, then offer to add it.
+    const code = String(rawText || "").trim();
+
     scanText.innerHTML = `
         <strong>✅ Barcode / QR Scanned</strong>
 
         <br><br>
 
         Scanned Code:
-        <strong>${escapeHTML(rawText)}</strong>
+        <strong>${escapeHTML(code)}</strong>
 
         <br><br>
 
-        ⚠️ This code does not contain product name,
-        quantity or expiry date.
-
-        <br><br>
-
-        To show all details without saving them first,
-        create the QR/barcode with product data inside it,
-        or connect an online product database/API.
+        <span id="scanLookupText">
+            🔍 Looking up product name online...
+        </span>
     `;
 
-    showToast("Code scanned successfully", "📷");
+    const fetchedName = await fetchProductNameByCode(code);
+
+    scannedPendingCode = code;
+    scannedPendingName = fetchedName || "";
+
+    if (fetchedName) {
+        scanText.innerHTML = `
+            <strong>✅ Barcode / QR Scanned</strong>
+
+            <br><br>
+
+            Scanned Code:
+            <strong>${escapeHTML(code)}</strong>
+
+            <br><br>
+
+            📦 Product:
+            <strong>${escapeHTML(fetchedName)}</strong>
+
+            <br><br>
+
+            <button
+                type="button"
+                class="save-button"
+                style="width:100%;"
+                onclick="openAddFromScan('${escapeAttribute(code)}', '${escapeAttribute(fetchedName)}')">
+
+                ➕ Add This Product
+
+            </button>
+        `;
+
+        showToast("Product found: " + fetchedName, "📦");
+    } else {
+        scanText.innerHTML = `
+            <strong>✅ Barcode / QR Scanned</strong>
+
+            <br><br>
+
+            Scanned Code:
+            <strong>${escapeHTML(code)}</strong>
+
+            <br><br>
+
+            ⚠️ No product name found online for this code.
+            You can still add it and type the name yourself.
+
+            <br><br>
+
+            <button
+                type="button"
+                class="save-button"
+                style="width:100%;"
+                onclick="openAddFromScan('${escapeAttribute(code)}', '')">
+
+                ➕ Add This Product
+
+            </button>
+        `;
+
+        showToast("Code scanned successfully", "📷");
+    }
 }
 
 
@@ -1414,6 +1758,448 @@ function renderAlerts() {
             </div>
         `;
     }).join("");
+}
+
+
+/* =====================================================
+   BILLING
+===================================================== */
+
+let billCart = [];
+
+function setupBilling() {
+    document.getElementById("billingSearch")
+        ?.addEventListener("input", renderBillingProducts);
+
+    document.getElementById("generateBillBtn")
+        ?.addEventListener("click", generateBill);
+
+    document.getElementById("printReceiptBtn")
+        ?.addEventListener("click", printReceipt);
+
+    renderBillingProducts();
+    renderBillCart();
+    renderBillList();
+}
+
+
+function renderBillingProducts() {
+    const container = document.getElementById("billingProducts");
+    if (!container) return;
+
+    const search =
+        (document.getElementById("billingSearch")?.value || "")
+            .trim()
+            .toLowerCase();
+
+    const list = products.filter(product => {
+        if (!product.name && !product.code) return false;
+
+        const name = String(product.name || "").toLowerCase();
+        const code = String(product.code || "").toLowerCase();
+
+        if (search && !name.includes(search) && !code.includes(search)) {
+            return false;
+        }
+
+        return getRemaining(product) > 0;
+    });
+
+    if (list.length === 0) {
+        container.innerHTML = emptyState(
+            "📦",
+            "No Products Available",
+            "Add products with stock first."
+        );
+        return;
+    }
+
+    container.innerHTML = list.map(product => {
+        const remaining = getRemaining(product);
+        const price = Number(product.price) || 0;
+
+        return `
+            <div class="bill-product-row">
+                <div class="bill-product-info">
+                    <strong>${escapeHTML(product.name)}</strong>
+                    <small>
+                        ID: ${escapeHTML(product.code)} • Stock: ${remaining} • ₹${price}
+                    </small>
+                </div>
+
+                <button
+                    type="button"
+                    class="bill-add-btn"
+                    onclick="addToBill('${escapeAttribute(product.id)}')">
+                    +
+                </button>
+            </div>
+        `;
+    }).join("");
+}
+
+
+function addToBill(productId) {
+    const product = products.find(
+        item => String(item.id) === String(productId)
+    );
+
+    if (!product) {
+        showToast("Product not found", "❌");
+        return;
+    }
+
+    const remaining = getRemaining(product);
+
+    if (remaining <= 0) {
+        showToast("No stock available", "⚠️");
+        return;
+    }
+
+    const existing = billCart.find(
+        item => String(item.productId) === String(productId)
+    );
+
+    const currentQty = existing ? existing.qty : 0;
+
+    if (currentQty >= remaining) {
+        showToast("Not enough stock", "⚠️");
+        return;
+    }
+
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        billCart.push({
+            productId: product.id,
+            name: product.name,
+            code: product.code,
+            price: Number(product.price) || 0,
+            qty: 1
+        });
+    }
+
+    renderBillCart();
+    showToast(product.name + " added to bill", "🛒");
+}
+
+
+function removeFromBill(productId) {
+    billCart = billCart.filter(
+        item => String(item.productId) !== String(productId)
+    );
+    renderBillCart();
+}
+
+
+function changeBillQty(productId, delta) {
+    const product = products.find(
+        item => String(item.id) === String(productId)
+    );
+
+    if (!product) return;
+
+    const remaining = getRemaining(product);
+    const item = billCart.find(
+        cartItem => String(cartItem.productId) === String(productId)
+    );
+
+    if (!item) return;
+
+    const newQty = item.qty + delta;
+
+    if (newQty < 1) {
+        removeFromBill(productId);
+        return;
+    }
+
+    if (newQty > remaining) {
+        showToast("Not enough stock", "⚠️");
+        return;
+    }
+
+    item.qty = newQty;
+    renderBillCart();
+}
+
+
+function renderBillCart() {
+    const container = document.getElementById("billCart");
+    const totalEl = document.getElementById("billTotal");
+    const countEl = document.getElementById("billItemCount");
+
+    const count = billCart.reduce((sum, item) => sum + item.qty, 0);
+
+    if (countEl) countEl.textContent = count + " item(s)";
+
+    if (!container) return;
+
+    if (billCart.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🧾</div>
+                <h3>Bill is Empty</h3>
+                <p>Add products from the left side.</p>
+            </div>
+        `;
+
+        if (totalEl) totalEl.textContent = "₹0.00";
+        return;
+    }
+
+    let total = 0;
+
+    container.innerHTML = billCart.map(item => {
+        const lineTotal = item.price * item.qty;
+        total += lineTotal;
+
+        return `
+            <div class="bill-cart-row">
+                <div class="bill-cart-info">
+                    <strong>${escapeHTML(item.name)}</strong>
+                    <small>₹${item.price} × ${item.qty}</small>
+                </div>
+
+                <div class="bill-cart-qty">
+                    <button
+                        type="button"
+                        class="qty-btn"
+                        onclick="changeBillQty('${escapeAttribute(item.productId)}', -1)">
+                        −
+                    </button>
+
+                    <span>${item.qty}</span>
+
+                    <button
+                        type="button"
+                        class="qty-btn"
+                        onclick="changeBillQty('${escapeAttribute(item.productId)}', 1)">
+                        +
+                    </button>
+                </div>
+
+                <strong class="bill-cart-line">₹${lineTotal.toFixed(2)}</strong>
+
+                <button
+                    type="button"
+                    class="qty-btn remove-qty"
+                    onclick="removeFromBill('${escapeAttribute(item.productId)}')">
+                    ✕
+                </button>
+            </div>
+        `;
+    }).join("");
+
+    if (totalEl) totalEl.textContent = "₹" + total.toFixed(2);
+}
+
+
+function generateBill() {
+    if (billCart.length === 0) {
+        showToast("Bill is empty", "⚠️");
+        return;
+    }
+
+    for (const item of billCart) {
+        const product = products.find(
+            p => String(p.id) === String(item.productId)
+        );
+
+        if (!product) {
+            showToast("A product is missing", "❌");
+            return;
+        }
+
+        if (item.qty > getRemaining(product)) {
+            showToast("Not enough stock for " + product.name, "⚠️");
+            return;
+        }
+    }
+
+    const billNumber = "B" + Date.now().toString().slice(-8);
+    let total = 0;
+
+    const billItems = billCart.map(item => {
+        const lineTotal = item.price * item.qty;
+        total += lineTotal;
+
+        const product = products.find(
+            p => String(p.id) === String(item.productId)
+        );
+
+        return {
+            productId: item.productId,
+            name: item.name,
+            code: item.code,
+            price: item.price,
+            qty: item.qty,
+            lineTotal
+        };
+    });
+
+    for (const item of billCart) {
+        const product = products.find(
+            p => String(p.id) === String(item.productId)
+        );
+
+        if (product) {
+            product.sold = Number(product.sold) + item.qty;
+            saveSaleHistory(product, item.qty, getRemaining(product) + item.qty);
+        }
+    }
+
+    saveProducts();
+
+    let bills = getBills();
+    bills.unshift({
+        billNumber,
+        items: billItems,
+        total,
+        date: new Date().toISOString()
+    });
+    bills = bills.slice(0, 50);
+    localStorage.setItem("expiryBills", JSON.stringify(bills));
+
+    billCart = [];
+    renderBillCart();
+    renderBillingProducts();
+    renderBillList();
+    updateAll();
+
+    showToast(
+        "Bill " + billNumber + " generated. ₹" + total.toFixed(2) + " | Stock updated",
+        "🧾"
+    );
+
+    openReceipt(billNumber);
+}
+
+
+function getBills() {
+    try {
+        const saved = localStorage.getItem("expiryBills");
+        return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+
+function renderBillList() {
+    const container = document.getElementById("billList");
+    if (!container) return;
+
+    const bills = getBills();
+
+    if (bills.length === 0) {
+        container.innerHTML = emptyState(
+            "🧾",
+            "No Bills Yet",
+            "Generated bills will appear here."
+        );
+        return;
+    }
+
+    container.innerHTML = bills.map(bill => {
+        const date = new Date(bill.date);
+
+        const formattedDate = date.toLocaleDateString("en-IN", {
+            day: "2-digit", month: "short", year: "numeric"
+        });
+
+        const formattedTime = date.toLocaleTimeString("en-IN", {
+            hour: "2-digit", minute: "2-digit"
+        });
+
+        const itemSummary = bill.items
+            .map(item => item.name + " ×" + item.qty)
+            .join(", ");
+
+        return `
+            <div class="bill-history-card">
+                <div class="bill-history-head">
+                    <strong>#${escapeHTML(bill.billNumber)}</strong>
+                    <small>${formattedDate} • ${formattedTime}</small>
+                </div>
+
+                <p class="bill-history-items">${escapeHTML(itemSummary)}</p>
+
+                <div class="bill-history-total">
+                    <span>${bill.items.length} item type(s)</span>
+                    <strong>₹${Number(bill.total || 0).toFixed(2)}</strong>
+                </div>
+
+                <button
+                    type="button"
+                    class="receipt-btn"
+                    onclick="openReceipt('${escapeAttribute(bill.billNumber)}')">
+                    🖨️ View / Print Receipt
+                </button>
+            </div>
+        `;
+    }).join("");
+}
+
+
+/* =====================================================
+   RECEIPT
+===================================================== */
+
+function openReceipt(billNumber) {
+    const bill = getBills().find(
+        b => String(b.billNumber) === String(billNumber)
+    );
+
+    if (!bill) {
+        showToast("Bill not found", "❌");
+        return;
+    }
+
+    const receiptItems = document.getElementById("receiptItems");
+    if (!receiptItems) return;
+
+    const date = new Date(bill.date);
+
+    const formattedDate = date.toLocaleDateString("en-IN", {
+        day: "2-digit", month: "short", year: "numeric"
+    });
+
+    const formattedTime = date.toLocaleTimeString("en-IN", {
+        hour: "2-digit", minute: "2-digit"
+    });
+
+    let rows = "";
+
+    bill.items.forEach((item, index) => {
+        const lineTotal = (Number(item.price) || 0) * Number(item.qty);
+        rows += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${escapeHTML(item.name)}</td>
+                <td>${Number(item.qty)}</td>
+                <td>${Number(item.price).toFixed(2)}</td>
+                <td>${lineTotal.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    setText("receiptNumber", "#" + bill.billNumber);
+    setText("receiptDate", formattedDate + " • " + formattedTime);
+    setText("receiptItemCount", bill.items.length + " item type(s)");
+    receiptItems.innerHTML = rows;
+    setText("receiptTotal", "₹" + Number(bill.total || 0).toFixed(2));
+
+    document.getElementById("receiptModal")?.classList.remove("hidden");
+}
+
+
+function closeReceipt() {
+    document.getElementById("receiptModal")?.classList.add("hidden");
+}
+
+
+function printReceipt() {
+    window.print();
 }
 
 
